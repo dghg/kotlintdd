@@ -1,8 +1,9 @@
 package dev.dghg.tdd
 
-import dev.dghg.tdd.currency.Dollar
-import dev.dghg.tdd.currency.Franc
+import dev.dghg.tdd.currency.Bank
+import dev.dghg.tdd.currency.Expression
 import dev.dghg.tdd.currency.Money
+import dev.dghg.tdd.currency.Sum
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.shouldBe
@@ -35,13 +36,39 @@ internal class CurrencyTest: AnnotationSpec() {
     fun `Equality test`() {
         Money.dollar(6) shouldNotBe Money.dollar(5)
         Money.dollar(5) shouldBe Money.dollar(5)
-        Money.franc(6) shouldNotBe Money.franc(5)
-        Money.franc(5) shouldBe Money.franc(5)
         Money.dollar(5) shouldNotBe Money.franc(5)
     }
 
     @Test
-    fun `test Different Class equality`() {
-        Money(10, "CHF") shouldBe Franc(10, "CHF")
+    fun `addition test`() {
+        val sum: Expression = Money.dollar(5).plus(Money.dollar(5))
+        val bank: Bank = Bank()
+        val reduced = bank.reduce(sum, "USD")
+        reduced shouldBe Money.dollar(10)
+    }
+
+    @Test
+    fun `plus return sum test`() {
+        val fiveDollar = Money.dollar(5)
+        val result: Expression = fiveDollar.plus(fiveDollar)
+        val sum = result as Sum
+        sum.augend shouldBe fiveDollar
+        sum.addend shouldBe fiveDollar
+    }
+
+    @Test
+    fun `reduce argument Money test`() {
+        val bank = Bank()
+        val reduced = bank.reduce(Money.dollar(5), "USD")
+        reduced shouldBe Money.dollar(5)
+    }
+
+    @Test
+    fun `money rate test`() {
+        val bank = Bank()
+        bank.addRate("CHF", "USD", 2)
+        val twoFranc = Money.franc(2)
+        twoFranc.reduce(bank, "CHF") shouldBe Money.franc(2)
+        twoFranc.reduce(bank, "USD") shouldBe Money.dollar(1)
     }
 }
