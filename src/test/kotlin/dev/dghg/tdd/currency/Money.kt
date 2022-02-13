@@ -20,12 +20,12 @@ open class Money(
     override fun toString(): String {
         return "$amount $currency"
     }
-    fun times(multiplier: Int): Money {
+    override fun times(multiplier: Int): Expression {
         return Money(amount * multiplier, currency)
     }
 
-    fun plus(money: Money): Expression {
-        return Sum(this, money)
+    override fun plus(addend: Expression): Expression {
+        return Sum(this, addend)
     }
 
     override fun reduce(bank: Bank, to: String): Money {
